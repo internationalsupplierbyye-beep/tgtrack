@@ -118,7 +118,12 @@
     }
 
     function renderCard(data, id) {
-      const sType = data.servicePackage ? `${data.serviceType} (${data.servicePackage})` : data.serviceType;
+      let sType = data.serviceType || "-";
+      // Package အကွက်တွင် အချက်အလက် တကယ်ရှိမရှိကို သေချာစစ်ဆေးခြင်း
+      if (data.servicePackage && data.servicePackage.trim() !== "" && data.servicePackage !== "-- None --") {
+        sType = `${data.serviceType} (${data.servicePackage})`;
+      }
+      
       const apptDT = `${data.appointmentDate || "-"} ${data.appointmentTime || ""}`;
       
       // Database (Firestore) ထဲတွင် mapLink ရှိမရှိ စစ်ဆေးပြီး လင့်ခ်ထုတ်ပေးခြင်း
@@ -126,6 +131,9 @@
       if (data.mapLink && data.mapLink.trim() !== "") {
          mapLinkHtml = `<a href="${data.mapLink.trim()}" target="_blank" style="color: #4f46e5; text-decoration: none; font-weight: 700;">📍 မြေပုံကြည့်ရန် နှိပ်ပါ</a>`;
       }
+
+      // Remark ကို စစ်ဆေးခြင်း (မရှိပါက - ပြမည်)
+      const remarkText = data.remark && data.remark.trim() !== "" ? data.remark : "-";
 
       // ငွေကြေးပမာဏများကို 0.00 ပုံစံဖြင့် ပြင်ဆင်ခြင်း
       const total = data.price != null ? Number(data.price).toFixed(2) : "0.00";
@@ -144,7 +152,7 @@
           </div>
           <div class="row">
             <span class="label">ဝန်ဆောင်မှု (Package)</span>
-            <span class="value">${sType || "-"}</span>
+            <span class="value">${sType}</span>
           </div>
           <div class="row">
             <span class="label">ချိန်းဆိုထားသောရက်</span>
@@ -157,6 +165,11 @@
           <div class="row">
             <span class="label">GOOGLE MAP LINK</span>
             <span class="value">${mapLinkHtml}</span>
+          </div>
+          
+          <div class="row" style="align-items: flex-start;">
+            <span class="label">မှတ်ချက် (Remark)</span>
+            <span class="value" style="max-width: 65%; word-break: break-word; text-align: right; color: #b45309;">${remarkText}</span>
           </div>
           
           <div class="row" style="margin-top: 14px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
