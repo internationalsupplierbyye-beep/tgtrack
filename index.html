@@ -54,8 +54,10 @@
     
     .status-badge {
       padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      text-transform: capitalize;
     }
     .status-pending { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+    .status-ongoing { background: #fef08a; color: #854d0e; border: 1px solid #fde047; } /* Ongoing အတွက် အရောင်အသစ် */
     .status-confirm { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
     .status-completed { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .status-cancel { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
@@ -82,6 +84,17 @@
     <div id="resultContainer" class="result-container">
       <h4 style="margin: 0 0 12px; font-size: 15px; color: var(--text);">ရှာဖွေတွေ့ရှိမှု:</h4>
       <div id="resultsList"></div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+        <p style="margin: 0 0 8px; font-weight: 600;">လူကြီးမင်း၏ Tracker တွင် လက်ရှိအခြေအနေ တွင်ပေါ်နေသောအရာများသည် အောက်ပါအတိုင်းဖြစ်သည်။</p>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li style="margin-bottom: 4px;"><b>Pending</b> - လူကြီးမင်း၏ စာရွက်စာတမ်းများ သက်ဆိုင်ရာကို တင်ပေးရန်ပြင်ဆင်ပြီ</li>
+          <li style="margin-bottom: 4px;"><b>Ongoing</b> - လူကြီးမင်း၏ စာရွက်စာတမ်းများကို တင်ပေးပြီးပါပြီ အတည်ပြုစောင့်ရန်</li>
+          <li style="margin-bottom: 4px;"><b>Confirm</b> - လူကြီးမင်း၏ ရက်ချိန်း (သို့) ဝန်ဆောင်မှုရယူရန်လာရောက်ဖို့အတည်ဖြစ်ပြီ</li>
+          <li style="margin-bottom: 4px;"><b>Completed</b> - လူကြီးမင်း၏ ဝန်ဆောင်မှုအားလုံးပြီးဆုံးအောင်မြင်စွာဝန်ဆောင်မှုရရှိပြီ</li>
+          <li><b>Cancel</b> - လူကြီးမင်း၏ ရက်ချိန်း (သို့) ဝန်ဆောင်မှု ပေးအပ်ခြင်းသည် အခြေအနေ အရပ်ရပ်ကြောင့် ပျက်စီးသွားခြင်း</li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -112,6 +125,7 @@
     function getStatusBadge(status) {
       const s = (status || "Pending").toLowerCase();
       if (s === "confirm") return `<span class="status-badge status-confirm">${status}</span>`;
+      if (s === "ongoing") return `<span class="status-badge status-ongoing">${status}</span>`; // Ongoing အတွက် အသစ်
       if (s === "completed" || s === "done") return `<span class="status-badge status-completed">${status}</span>`;
       if (s === "cancel") return `<span class="status-badge status-cancel">${status}</span>`;
       return `<span class="status-badge status-pending">${status}</span>`;
