@@ -57,7 +57,7 @@
       text-transform: capitalize;
     }
     .status-pending { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
-    .status-ongoing { background: #fef08a; color: #854d0e; border: 1px solid #fde047; } /* Ongoing အတွက် အရောင်အသစ် */
+    .status-ongoing { background: #fef08a; color: #854d0e; border: 1px solid #fde047; } 
     .status-confirm { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
     .status-completed { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .status-cancel { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
@@ -81,6 +81,7 @@
     </div>
 
     <div id="msgBox" class="msg"></div>
+    
     <div id="resultContainer" class="result-container">
       <h4 style="margin: 0 0 12px; font-size: 15px; color: var(--text);">ရှာဖွေတွေ့ရှိမှု:</h4>
       <div id="resultsList"></div>
@@ -102,7 +103,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // index.html မှ Firebase Config အတိုင်း
     const firebaseConfig = {
       apiKey: "AIzaSyBrXn36vL3_Ls4o4mTqaR_HGELJpQEpAw0",
       authDomain: "thaiguide-cf5e2.firebaseapp.com",
@@ -125,7 +125,7 @@
     function getStatusBadge(status) {
       const s = (status || "Pending").toLowerCase();
       if (s === "confirm") return `<span class="status-badge status-confirm">${status}</span>`;
-      if (s === "ongoing") return `<span class="status-badge status-ongoing">${status}</span>`; // Ongoing အတွက် အသစ်
+      if (s === "ongoing") return `<span class="status-badge status-ongoing">${status}</span>`; 
       if (s === "completed" || s === "done") return `<span class="status-badge status-completed">${status}</span>`;
       if (s === "cancel") return `<span class="status-badge status-cancel">${status}</span>`;
       return `<span class="status-badge status-pending">${status}</span>`;
@@ -133,23 +133,18 @@
 
     function renderCard(data, id) {
       let sType = data.serviceType || "-";
-      // Package အကွက်တွင် အချက်အလက် တကယ်ရှိမရှိကို သေချာစစ်ဆေးခြင်း
       if (data.servicePackage && data.servicePackage.trim() !== "" && data.servicePackage !== "-- None --") {
         sType = `${data.serviceType} (${data.servicePackage})`;
       }
       
       const apptDT = `${data.appointmentDate || "-"} ${data.appointmentTime || ""}`;
       
-      // Database (Firestore) ထဲတွင် mapLink ရှိမရှိ စစ်ဆေးပြီး လင့်ခ်ထုတ်ပေးခြင်း
       let mapLinkHtml = "-";
       if (data.mapLink && data.mapLink.trim() !== "") {
          mapLinkHtml = `<a href="${data.mapLink.trim()}" target="_blank" style="color: #4f46e5; text-decoration: none; font-weight: 700;">📍 မြေပုံကြည့်ရန် နှိပ်ပါ</a>`;
       }
 
-      // Remark ကို စစ်ဆေးခြင်း (မရှိပါက - ပြမည်)
       const remarkText = data.remark && data.remark.trim() !== "" ? data.remark : "-";
-
-      // ငွေကြေးပမာဏများကို 0.00 ပုံစံဖြင့် ပြင်ဆင်ခြင်း
       const total = data.price != null ? Number(data.price).toFixed(2) : "0.00";
       const deposit = data.depositAmount != null ? Number(data.depositAmount).toFixed(2) : "0.00";
       const balance = data.balanceAmount != null ? Number(data.balanceAmount).toFixed(2) : "0.00";
@@ -211,7 +206,6 @@
       const searchValue = searchInput.value.trim();
       if (!searchValue) return;
 
-      // --- အသစ်ထည့်ရမည့် Tracker Log သိမ်းဆည်းသည့် Code အစ ---
       try {
         await addDoc(collection(db, "search_logs"), {
           searchedKeyword: searchValue,
@@ -221,12 +215,12 @@
       } catch (logError) {
         console.error("Tracker log မှတ်သားရာတွင် အခက်အခဲရှိပါသည်: ", logError);
       }
-      // --- အသစ်ထည့်ရမည့် Tracker Log သိမ်းဆည်းသည့် Code အဆုံး ---
 
       searchBtn.disabled = true;
       searchBtn.textContent = "ရှာဖွေနေပါသည်...";
       msgBox.className = "msg loading";
       msgBox.textContent = "Data များကို ဆွဲယူနေပါသည်...";
+      msgBox.style.display = "block";
       resultContainer.style.display = "none";
       resultsList.innerHTML = "";
 
@@ -260,8 +254,21 @@
           resultsList.innerHTML = html;
           resultContainer.style.display = "block";
         } else {
-          msgBox.className = "msg error";
-          msgBox.textContent = "လူကြီးမင်း ရှာဖွေသော အချက်အလက်များကို မတွေ့ရှိပါ။ ဖုန်းနံပါတ် သို့မဟုတ် Invoice ID မှန်ကန်မှုရှိမရှိ ပြန်လည်စစ်ဆေးပေးပါ။";
+          // --- Data မတွေ့ပါက Messenger Link ပြသမည့် အပိုင်း အသစ် ---
+          msgBox.className = "msg"; 
+          msgBox.innerHTML = `
+            <div style="text-align: center; padding: 30px 20px; background: #ffffff; border-radius: 12px; border: 1px solid #fee2e2; margin-top: 15px;">
+              <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+              <h3 style="color: #dc2626; margin: 0 0 8px 0;">အချက်အလက် မတွေ့ပါ</h3>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px; line-height: 1.6;">
+                သင်ရှာဖွေသော Invoice ID (သို့) ဖုန်းနံပါတ် မှားယွင်းနေနိုင်ပါသည်။ ကျေးဇူးပြု၍ ပြန်လည်စစ်ဆေးကြည့်ပါ။
+              </p>
+              <a href="https://m.me/thailandguideforyou" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #0084ff; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0, 132, 255, 0.2);">
+                <span style="font-size: 18px;">💬</span> အကူအညီလိုပါသလား? Admin သို့ ဆက်သွယ်ရန်
+              </a>
+            </div>
+          `;
+          msgBox.style.display = "block";
         }
       } catch (error) {
         console.error(error);
