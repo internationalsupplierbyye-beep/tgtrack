@@ -100,7 +100,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     // index.html မှ Firebase Config အတိုင်း
     const firebaseConfig = {
@@ -210,6 +210,18 @@
     async function handleSearch() {
       const searchValue = searchInput.value.trim();
       if (!searchValue) return;
+
+      // --- အသစ်ထည့်ရမည့် Tracker Log သိမ်းဆည်းသည့် Code အစ ---
+      try {
+        await addDoc(collection(db, "search_logs"), {
+          searchedKeyword: searchValue,
+          userAgent: navigator.userAgent,
+          timestamp: serverTimestamp()
+        });
+      } catch (logError) {
+        console.error("Tracker log မှတ်သားရာတွင် အခက်အခဲရှိပါသည်: ", logError);
+      }
+      // --- အသစ်ထည့်ရမည့် Tracker Log သိမ်းဆည်းသည့် Code အဆုံး ---
 
       searchBtn.disabled = true;
       searchBtn.textContent = "ရှာဖွေနေပါသည်...";
